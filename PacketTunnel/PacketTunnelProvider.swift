@@ -26,7 +26,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
 	override func startTunnel(options: [String : NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         DDLog.removeAllLoggers()
-        DDLog.add(DDASLLogger.sharedInstance(), with: DDLogLevel.info)
+        DDLog.add(DDASLLogger.sharedInstance, with: DDLogLevel.info)
         ObserverFactory.currentFactory = DebugObserverFactory()
         NSLog("-------------")
         
@@ -40,13 +40,18 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         NSLog(ss_adder)
         
         let ss_port = conf["ss_port"] as! Int
-        let method = conf["ss_method"] as! String
-        NSLog(method)
+        let ss_method = conf["ss_method"] as! String
+        NSLog(ss_method)
 
-        let password = conf["ss_password"] as!String
-                
+        let ss_password = conf["ss_password"] as!String
+        let ss_algorithm = CryptoAlgorithm(rawValue: ss_method.uppercased())
+
+        let cryptoFactory = ShadowsocksAdapter.CryptoStreamProcessor.Factory(password: ss_password, algorithm: ss_algorithm)
+        let protocalObf = ShadowsocksAdapter.ProtocolObfuscater.OriginProtocolObfuscater.Factory()
+        let streamObf = ShadowsocksAdapter.StreamObfuscater.OriginStreamObfuscater.Factory()
         // Proxy Adapter
-        let ssAdapterFactory = ShadowsocksAdapterFactory(serverHost: ss_adder, serverPort: ss_port, encryptAlgorithm: method, password: password)!
+        let ssAdapterFactory = ShadowsocksAdapterFactory(serverHost: ss_adder, serverPort: ss_port,// encryptAlgorithm: method, password: ss_password,
+                cryptorFactory:cryptoFactory, protocolObfuscaterFactory:protocalObf, streamObfuscaterFactory:streamObf)!
         let directAdapterFactory = DirectAdapterFactory()
         
         //Get lists from conf
@@ -165,7 +170,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             
             
             if !self.started{
-                self.proxyServer = GCDHTTPProxyServer(address: IPv4Address(fromString: "127.0.0.1"), port: NEKit.Port(port: UInt16(self.proxyPort)))
+                self.proxyServer = GCDHTTPProxyServer(address: IPAddress(fromString: "127.0.0.1"), port: NEKit.Port(port: UInt16(self.proxyPort)))
                 try! self.proxyServer.start()
                 self.addObserver(self, forKeyPath: "defaultPath", options: .initial, context: nil)
             }else{
@@ -183,19 +188,19 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 
                 self.interface = TUNInterface(packetFlow: self.packetFlow)
                 
-                let fakeIPPool = IPv4Pool(start: IPv4Address(fromString: "198.18.1.1")!, end: IPv4Address(fromString: "198.18.255.255")!)
-                let dnsServer = DNSServer(address: IPv4Address(fromString: "198.18.0.1")!, port: NEKit.Port(port: 53), fakeIPPool: fakeIPPool)
-                let resolver = UDPDNSResolver(address: IPv4Address(fromString: "114.114.114.114")!, port: NEKit.Port(port: 53))
+                let fakeIPPool = IPPool(startIP: IPAddress(fromString: "198.18.1.1")!, endIP: IPAddress(fromString: "198.18.255.255")!)
+                let dnsServer = DNSServer(address: IPAddress(fromString: "198.18.0.1")!, port: NEKit.Port(port: 53), fakeIPPool: fakeIPPool)
+                let resolver = UDPDNSResolver(address: IPAddress(fromString: "114.114.114.114")!, port: NEKit.Port(port: 53))
                 dnsServer.registerResolver(resolver)
                 self.interface.registerStack(dnsServer)
                 DNSServer.currentServer = dnsServer
                 
                 let udpStack = UDPDirectStack()
-                self.interface.registerStack(udpStack)
+                self.interface.register(stack:udpStack)
                 
                 let tcpStack = TCPStack.stack
                 tcpStack.proxyServer = self.proxyServer
-                self.interface.registerStack(tcpStack)
+                self.interface.register(stack:tcpStack)
                 self.interface.start()
             }
             self.started = true

@@ -168,10 +168,10 @@ extension VpnManager{
     
     fileprivate func setRulerConfig(_ manager:NETunnelProviderManager){
         var conf = [String:AnyObject]()
-        conf["ss_address"] = "YOUR SS URL" as AnyObject?
-        conf["ss_port"] = 1025 as AnyObject?
+        conf["ss_address"] = "45.32.249.164" as AnyObject?
+        conf["ss_port"] = 18989 as AnyObject?
         conf["ss_method"] = "AES-256-CFB" as AnyObject?
-        conf["ss_password"] = "YOUR SS PASSWORD" as AnyObject?
+        conf["ss_password"] = "Asdf1234!" as AnyObject?
         conf["ymal_conf"] = getRuleConf() as AnyObject?
         let orignConf = manager.protocolConfiguration as! NETunnelProviderProtocol
         orignConf.providerConfiguration = conf
