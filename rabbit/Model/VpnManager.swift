@@ -21,6 +21,15 @@ enum VPNStatus {
 class VpnManager{
     static let shared = VpnManager()
     var observerAdded: Bool = false
+    var vpnManager: NETunnelProviderManager = NETunnelProviderManager()
+    let tunnelBundleId = "com.windvalley.rabbit.PacketTunnel"
+    let serverAddress = "192.168.123.62"//"<server-ip>"
+    let serverPort = "8389"//"54345"
+    let mtu = "1400"
+    let ip = "a.ssx.host"
+    let subnet = "255.255.255.0"
+    let password = "asdf"
+    let method = "aes-128-cfb"
 
     
     fileprivate(set) var vpnStatus = VPNStatus.off {
@@ -76,63 +85,105 @@ extension VpnManager{
 
     
     fileprivate func createProviderManager() -> NETunnelProviderManager {
-
-        
         let manager = NETunnelProviderManager()
         let conf = NETunnelProviderProtocol()
         conf.serverAddress = "Rabbit"
         manager.protocolConfiguration = conf
-        manager.localizedDescription = "Rabbit VPN"
+        manager.localizedDescription = "com.windvalley.rabbit.PacketTunnel"
         return manager
     }
-    
-    
-    func loadAndCreatePrividerManager(_ complete: @escaping (NETunnelProviderManager?) -> Void ){
-        NETunnelProviderManager.loadAllFromPreferences{ (managers, error) in
-            guard let managers = managers else{return}
-            let manager: NETunnelProviderManager
-            if managers.count > 0 {
-                manager = managers[0]
-                self.delDupConfig(managers)
-            }else{
-                manager = self.createProviderManager()
+    func initVPNTunnelProviderManager() {
+        NETunnelProviderManager.loadAllFromPreferences { (savedManagers: [NETunnelProviderManager]?, error: Error?) in
+            if let error = error {
+                print(error)
             }
-            
-            manager.isEnabled = true
-            self.setRulerConfig(manager)
-//            manager.saveToPreferences(completionHandler: { (error) in
-//                print("saveToPreferences")
-//                manager.loadFromPreferences(completionHandler: { (error) in
-//                    print("loadFromPreferences")
-//                    self.addVPNStatusObserver()
-//                    complete(manager)
-//                })
-//            })
-            
-//            manager.loadFromPreferences(completionHandler: { (error) in
-//                manager.saveToPreferences(completionHandler: { (errors) in
-//                    
-//                    self.addVPNStatusObserver()
-//                    complete(manager)
-//                })
-//                
-//            })
-            
-            
-            manager.saveToPreferences{
-                if $0 != nil{complete(manager);}//return;
-                manager.loadFromPreferences{
-                    if $0 != nil{
-                        print($0.debugDescription)
-                        complete(manager);//return;
-                    }
-                    self.addVPNStatusObserver()
-                    complete(manager)
+            if let savedManagers = savedManagers {
+                if savedManagers.count > 0 {
+                    self.vpnManager = savedManagers[0]
                 }
             }
             
+            self.vpnManager.loadFromPreferences(completionHandler: { (error:Error?) in
+                if let error = error {
+                    print(error)
+                }
+                
+                let providerProtocol = NETunnelProviderProtocol()
+                providerProtocol.providerBundleIdentifier = self.tunnelBundleId
+                
+                providerProtocol.providerConfiguration = ["port": self.serverPort,
+                                                          "server": self.serverAddress,
+                                                          "ip": self.ip,
+                                                          "subnet": self.subnet,
+                                                          "mtu": self.mtu,
+                                                          "password":self.password
+                ]//["port":1024,"method":"aes-256-cfb","password":"31415857","server": self.serverAddress]
+                
+                providerProtocol.serverAddress = self.serverAddress
+                self.vpnManager.protocolConfiguration = providerProtocol
+                self.vpnManager.localizedDescription = "NEPacketTunnelVPNDemoConfig"
+                self.vpnManager.isEnabled = true
+                
+                self.vpnManager.saveToPreferences(completionHandler: { (error:Error?) in
+                    if let error = error {
+                        print(error)
+                    } else {
+                        print("Save successfully")
+                    }
+                })
+                
+                
+            })
         }
     }
+
+    
+    
+    func loadAndCreatePrividerManager(_ complete: @escaping (NETunnelProviderManager?) -> Void ){
+        NETunnelProviderManager.loadAllFromPreferences { (savedManagers: [NETunnelProviderManager]?, error: Error?) in
+            if let error = error {
+                print(error)
+            }
+            if let savedManagers = savedManagers {
+                if savedManagers.count > 0 {
+                    self.vpnManager = savedManagers[0]
+                }
+            }
+            
+            self.vpnManager.loadFromPreferences(completionHandler: { (error:Error?) in
+                if let error = error {
+                    print(error)
+                }
+                
+                let providerProtocol = NETunnelProviderProtocol()
+                providerProtocol.providerBundleIdentifier = self.tunnelBundleId
+                
+                providerProtocol.providerConfiguration = ["port": self.serverPort,
+                                                          "server": self.serverAddress,
+                                                          "ip": self.ip,
+                                                          "subnet": self.subnet,
+                                                          "mtu": self.mtu,
+                                                          "password":self.password,
+                                                          "method":self.method
+                ]//["port":1024,"method":"aes-256-cfb","password":"31415857","server": self.serverAddress]
+                
+                providerProtocol.serverAddress = self.serverAddress
+                self.vpnManager.protocolConfiguration = providerProtocol
+                self.vpnManager.localizedDescription = "com.windvalley.rabbit.PacketTunnel"
+                self.vpnManager.isEnabled = true
+                
+                self.vpnManager.saveToPreferences(completionHandler: { (error:Error?) in
+                    if let error = error {
+                        print(error)
+                    } else {
+                        print("Save successfully")
+                    }
+                })
+                self.addVPNStatusObserver()
+                
+            })
+        }
+}
     
     func newSearchDictionary(identifier: String){
 //        var searchDictionary = <#value#>
@@ -176,14 +227,15 @@ extension VpnManager{
 // Actions
 extension VpnManager{
     func connect(){
-        self.loadAndCreatePrividerManager { (manager) in
-            guard let manager = manager else{return}
-            do{
-                try manager.connection.startVPNTunnel(options: [:])
-            }catch let err{
-                print(err)
-            }
-        }
+        self.initVPNTunnelProviderManager()
+//        self.loadAndCreatePrividerManager { (manager) in
+//            guard let manager = manager else{return}
+//            do{
+//                try manager.connection.startVPNTunnel(options: [:])
+//            }catch let err{
+//                print(err)
+//            }
+//        }
     }
     
     func disconnect(){
@@ -206,7 +258,7 @@ extension VpnManager{
         conf["ss_port"] = 8389 as AnyObject?
         conf["ss_method"] = "aes-128-cfb" as AnyObject?
         conf["ss_password"] = "asdf" as AnyObject?
-//        conf["ymal_conf"] = getRuleConf() as AnyObject?
+        conf["ymal_conf"] = getRuleConf() as AnyObject?
         let orignConf = manager.protocolConfiguration as! NETunnelProviderProtocol
         orignConf.providerConfiguration = conf
         manager.protocolConfiguration = orignConf

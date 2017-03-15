@@ -36,13 +36,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
         
         
+        
         let ss_adder = "192.168.132.62" // conf["ss_address"] as! String
         NSLog(ss_adder)
         
-        let ss_port = 8388 // conf["ss_port"] as! Int
+        let ss_port = 8389 // conf["ss_port"] as! Int
         let ss_method = "aes-128-cfb" //conf["ss_method"] as! String
         NSLog(ss_method)
-
+        
         let ss_password = "asdf" // conf["ss_password"] as!String
         let ss_algorithm = CryptoAlgorithm(rawValue: ss_method.uppercased())
 
