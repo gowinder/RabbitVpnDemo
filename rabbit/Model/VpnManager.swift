@@ -113,10 +113,11 @@ extension VpnManager{
                 
                 providerProtocol.providerConfiguration = ["port": self.serverPort,
                                                           "server": self.serverAddress,
-                                                          "ip": self.ip,
-                                                          "subnet": self.subnet,
-                                                          "mtu": self.mtu,
-                                                          "password":self.password
+//                                                          "ip": self.ip,
+//                                                          "subnet": self.subnet,
+//                                                          "mtu": self.mtu,
+                                                          "password":self.password,
+                                                          "method":self.method
                 ]//["port":1024,"method":"aes-256-cfb","password":"31415857","server": self.serverAddress]
                 
                 providerProtocol.serverAddress = self.serverAddress
@@ -129,6 +130,11 @@ extension VpnManager{
                         print(error)
                     } else {
                         print("Save successfully")
+                        do {
+                            try self.vpnManager.connection.startVPNTunnel(options: [:])
+                        } catch {
+                            print("startVPNTunnel \(error)")
+                        }
                     }
                 })
                 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		043F88AA1E793DD600B08E73 /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09549ACE1DDF3C0E000F198C /* NetworkExtension.framework */; };
 		044FC8C81E77DAA400013735 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 044FC8C71E77DAA300013735 /* GameKit.framework */; };
 		044FC8CA1E77DAB900013735 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 044FC8C91E77DAB900013735 /* StoreKit.framework */; };
 		044FC8CB1E77DAD000013735 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 044FC8C71E77DAA300013735 /* GameKit.framework */; };
@@ -14,7 +15,6 @@
 		0921EE341DDFF8F6006955C6 /* Notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0921EE331DDFF8F6006955C6 /* Notifications.swift */; };
 		09549AC41DDF3B4A000F198C /* PacketTunnelProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09549AC31DDF3B4A000F198C /* PacketTunnelProvider.swift */; };
 		09549AC81DDF3B4A000F198C /* PacketTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 09549ABF1DDF3B49000F198C /* PacketTunnel.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		09549ACF1DDF3C0E000F198C /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09549ACE1DDF3C0E000F198C /* NetworkExtension.framework */; };
 		09549AD01DDF3C2F000F198C /* NetworkExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09549ACE1DDF3C0E000F198C /* NetworkExtension.framework */; };
 		09549ADC1DDF406B000F198C /* CocoaAsyncSocket.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09549AD21DDF406B000F198C /* CocoaAsyncSocket.framework */; };
 		09549ADD1DDF406B000F198C /* CocoaLumberjack.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09549AD31DDF406B000F198C /* CocoaLumberjack.framework */; };
@@ -107,6 +107,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				043F88AA1E793DD600B08E73 /* NetworkExtension.framework in Frameworks */,
 				09E3FB5B1DF859E0001DE158 /* Resolver.framework in Frameworks */,
 				09549ADC1DDF406B000F198C /* CocoaAsyncSocket.framework in Frameworks */,
 				09549ADD1DDF406B000F198C /* CocoaLumberjack.framework in Frameworks */,
@@ -119,7 +120,6 @@
 				09549AE31DDF406B000F198C /* Sodium.framework in Frameworks */,
 				09549AE41DDF406B000F198C /* tun2socks.framework in Frameworks */,
 				09549AE51DDF406B000F198C /* Yaml.framework in Frameworks */,
-				09549ACF1DDF3C0E000F198C /* NetworkExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -482,7 +482,7 @@
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ISEC.JiGuangVPN.tunnel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -508,7 +508,7 @@
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = PacketTunnel/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.ISEC.JiGuangVPN.tunnel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
