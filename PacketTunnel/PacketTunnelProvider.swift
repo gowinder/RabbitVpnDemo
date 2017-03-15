@@ -36,22 +36,22 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         }
         
         
-        let ss_adder = conf["ss_address"] as! String
+        let ss_adder = "192.168.132.62" // conf["ss_address"] as! String
         NSLog(ss_adder)
         
-        let ss_port = conf["ss_port"] as! Int
-        let ss_method = conf["ss_method"] as! String
+        let ss_port = 8388 // conf["ss_port"] as! Int
+        let ss_method = "aes-128-cfb" //conf["ss_method"] as! String
         NSLog(ss_method)
 
-        let ss_password = conf["ss_password"] as!String
+        let ss_password = "asdf" // conf["ss_password"] as!String
         let ss_algorithm = CryptoAlgorithm(rawValue: ss_method.uppercased())
 
-        let cryptoFactory = ShadowsocksAdapter.CryptoStreamProcessor.Factory(password: ss_password, algorithm: ss_algorithm)
+        let cryptoFactory = ShadowsocksAdapter.CryptoStreamProcessor.Factory(password: ss_password, algorithm: ss_algorithm!)
         let protocalObf = ShadowsocksAdapter.ProtocolObfuscater.OriginProtocolObfuscater.Factory()
         let streamObf = ShadowsocksAdapter.StreamObfuscater.OriginStreamObfuscater.Factory()
         // Proxy Adapter
         let ssAdapterFactory = ShadowsocksAdapterFactory(serverHost: ss_adder, serverPort: ss_port,// encryptAlgorithm: method, password: ss_password,
-                cryptorFactory:cryptoFactory, protocolObfuscaterFactory:protocalObf, streamObfuscaterFactory:streamObf)!
+                protocolObfuscaterFactory:protocalObf, cryptorFactory:cryptoFactory, streamObfuscaterFactory:streamObf)
         let directAdapterFactory = DirectAdapterFactory()
         
         //Get lists from conf
@@ -160,15 +160,12 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             networkSettings.dnsSettings = DNSSettings
         }
         
-        setTunnelNetworkSettings(networkSettings) {
-            error in
+        setTunnelNetworkSettings(networkSettings) { (error) in
             guard error == nil else {
                 DDLogError("Encountered an error setting up the network: \(error)")
                 completionHandler(error)
                 return
             }
-            
-            
             if !self.started{
                 self.proxyServer = GCDHTTPProxyServer(address: IPAddress(fromString: "127.0.0.1"), port: NEKit.Port(port: UInt16(self.proxyPort)))
                 try! self.proxyServer.start()
@@ -177,10 +174,51 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 self.proxyServer.stop()
                 try! self.proxyServer.start()
             }
-            
             completionHandler(nil)
-            
-            
+            if self.enablePacketProcessing {
+                if self.started {
+                    self.interface.stop()
+                }
+                self.interface = TUNInterface.init(packetFlow: self.packetFlow)
+                let startip = IPAddress.init(fromString: "192.18.1.1")
+                let endip = IPAddress.init(fromString: "198.18.255.255")
+                let rang = try? IPRange.init(startIP: startip!, endIP: endip!)//try IPRange.init(startIP: startip!, endIP: endip!)
+                let fakeIPPool = IPPool.init(range: rang!)
+                let dnsServer = DNSServer.init(address: IPAddress.init(fromString: "198.18.1.1")!, port: NEKit.Port(port: 53), fakeIPPool: fakeIPPool)
+                let resolver = UDPDNSResolver(address: IPAddress(fromString: "114.114.114.114")!, port: NEKit.Port(port: 53))
+                dnsServer.registerResolver(resolver)
+                self.interface.register(stack: dnsServer)
+//                self.interface.registerStack(dnsServer)
+                DNSServer.currentServer = dnsServer
+                
+                let udpStack = UDPDirectStack()
+                self.interface.register(stack:udpStack)
+                
+                let tcpStack = TCPStack.stack
+                tcpStack.proxyServer = self.proxyServer
+                self.interface.register(stack:tcpStack)
+                self.interface.start()
+            }
+            self.started = true
+        }
+        /*
+        setTunnelNetworkSettings(networkSettings) {
+            (error) in
+            guard error == nil else {
+                DDLogError("Encountered an error setting up the network: \(error)")
+                completionHandler(error)
+                return
+            }
+            if !self.started{
+                self.proxyServer = GCDHTTPProxyServer(address: IPAddress(fromString: "127.0.0.1"), port: NEKit.Port(port: UInt16(self.proxyPort)))
+                try! self.proxyServer.start()
+                self.addObserver(self, forKeyPath: "defaultPath", options: .initial, context: nil)
+            }else{
+                self.proxyServer.stop()
+                try! self.proxyServer.start()
+            }
+            completionHandler(nil)
+        
             if self.enablePacketProcessing {
                 if self.started{
                     self.interface.stop()
@@ -188,7 +226,14 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 
                 self.interface = TUNInterface(packetFlow: self.packetFlow)
                 
-                let fakeIPPool = IPPool(startIP: IPAddress(fromString: "198.18.1.1")!, endIP: IPAddress(fromString: "198.18.255.255")!)
+                //let fakeIPPool = IPPool(startIP: IPAddress(fromString: "198.18.1.1")!, endIP: IPAddress(fromString: "198.18.255.255")!)
+                let startip = IPAddress.init(fromString: "192.18.1.1")
+                let endip = IPAddress.init(fromString: "198.18.255.255")
+                
+                let rang = try IPRange.init(startIP: startip!, endIP: endip!)
+                
+                let fakeIPPool = IPPool.init(range: rang)//(range: (startIP))
+         
                 let dnsServer = DNSServer(address: IPAddress(fromString: "198.18.0.1")!, port: NEKit.Port(port: 53), fakeIPPool: fakeIPPool)
                 let resolver = UDPDNSResolver(address: IPAddress(fromString: "114.114.114.114")!, port: NEKit.Port(port: 53))
                 dnsServer.registerResolver(resolver)
@@ -206,7 +251,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             self.started = true
 
         }
-        
+        */
     }
     
 

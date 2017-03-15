@@ -76,6 +76,8 @@ extension VpnManager{
 
     
     fileprivate func createProviderManager() -> NETunnelProviderManager {
+
+        
         let manager = NETunnelProviderManager()
         let conf = NETunnelProviderProtocol()
         conf.serverAddress = "Rabbit"
@@ -98,12 +100,31 @@ extension VpnManager{
             
             manager.isEnabled = true
             self.setRulerConfig(manager)
+//            manager.saveToPreferences(completionHandler: { (error) in
+//                print("saveToPreferences")
+//                manager.loadFromPreferences(completionHandler: { (error) in
+//                    print("loadFromPreferences")
+//                    self.addVPNStatusObserver()
+//                    complete(manager)
+//                })
+//            })
+            
+//            manager.loadFromPreferences(completionHandler: { (error) in
+//                manager.saveToPreferences(completionHandler: { (errors) in
+//                    
+//                    self.addVPNStatusObserver()
+//                    complete(manager)
+//                })
+//                
+//            })
+            
+            
             manager.saveToPreferences{
-                if $0 != nil{complete(nil);return;}
+                if $0 != nil{complete(manager);}//return;
                 manager.loadFromPreferences{
                     if $0 != nil{
                         print($0.debugDescription)
-                        complete(nil);return;
+                        complete(manager);//return;
                     }
                     self.addVPNStatusObserver()
                     complete(manager)
@@ -111,6 +132,15 @@ extension VpnManager{
             }
             
         }
+    }
+    
+    func newSearchDictionary(identifier: String){
+//        var searchDictionary = <#value#>
+        
+    }
+    
+    func createKeychainValue(password: String, identifier: String){
+        
     }
     
     func loadProviderManager(_ complete: @escaping (NETunnelProviderManager?) -> Void){
@@ -137,6 +167,10 @@ extension VpnManager{
             }
         }
     }
+    //存储vpn的配置信息
+    
+    
+    
 }
 
 // Actions
@@ -168,11 +202,11 @@ extension VpnManager{
     
     fileprivate func setRulerConfig(_ manager:NETunnelProviderManager){
         var conf = [String:AnyObject]()
-        conf["ss_address"] = "45.32.249.164" as AnyObject?
-        conf["ss_port"] = 18989 as AnyObject?
-        conf["ss_method"] = "AES-256-CFB" as AnyObject?
-        conf["ss_password"] = "Asdf1234!" as AnyObject?
-        conf["ymal_conf"] = getRuleConf() as AnyObject?
+        conf["ss_address"] = "192.168.123.62" as AnyObject?
+        conf["ss_port"] = 8389 as AnyObject?
+        conf["ss_method"] = "aes-128-cfb" as AnyObject?
+        conf["ss_password"] = "asdf" as AnyObject?
+//        conf["ymal_conf"] = getRuleConf() as AnyObject?
         let orignConf = manager.protocolConfiguration as! NETunnelProviderProtocol
         orignConf.providerConfiguration = conf
         manager.protocolConfiguration = orignConf
