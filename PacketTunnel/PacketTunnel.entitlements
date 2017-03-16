@@ -10,5 +10,9 @@
 	<array>
 		<string>group.svpn_client</string>
 	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.ISEC.JiGuangVPN.tunnel</string>
+	</array>
 </dict>
 </plist>
