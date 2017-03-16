@@ -22,7 +22,7 @@ class VpnManager{
     static let shared = VpnManager()
     var observerAdded: Bool = false
     var vpnManager: NETunnelProviderManager = NETunnelProviderManager()
-    let tunnelBundleId = "com.windvalley.rabbit.PacketTunnel"
+    let tunnelBundleId = "com.ISEC.JiGuangVPN.tunnel"
     let serverAddress = "192.168.123.62"//"<server-ip>"
     let serverPort = "8389"//"54345"
     let mtu = "1400"
@@ -117,7 +117,8 @@ extension VpnManager{
 //                                                          "subnet": self.subnet,
 //                                                          "mtu": self.mtu,
                                                           "password":self.password,
-                                                          "method":self.method
+                                                          "method":self.method,
+                                                          "ymal_conf":self.getRuleConf()
                 ]//["port":1024,"method":"aes-256-cfb","password":"31415857","server": self.serverAddress]
                 
                 providerProtocol.serverAddress = self.serverAddress
